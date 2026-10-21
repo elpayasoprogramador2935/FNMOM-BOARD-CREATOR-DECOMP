@@ -1,4 +1,4 @@
-name: multiplatform-build
+name: Multiplatform Build
 
 on:
   push:
@@ -68,17 +68,21 @@ jobs:
         run: haxelib install hxcpp --quiet
 
       - name: Compilar
+        env:
+          # hxcpp detecta el SDK como "macosx26" con Xcode 26 y xcrun no lo encuentra; vacío usa el SDK por defecto
+          MACOSX_VER: ""
         run: haxelib run lime build ${{ matrix.target }} -release
 
       - name: Empaquetar
         run: |
           mkdir -p dist
-          bin=export/release/${{ matrix.dir }}/bin
+          bin=export/${{ matrix.dir }}/bin
+          test -d $bin || { find export -maxdepth 3 -type d; exit 1; }
           case "${{ matrix.name }}" in
-            windows) (cd $bin && 7z a -tzip ../../../../dist/$APP_NAME-windows.zip ./*) ;;
+            windows) (cd $bin && 7z a -tzip ../../../dist/$APP_NAME-windows.zip ./*) ;;
             linux) tar -czf dist/$APP_NAME-linux.tar.gz -C $bin . ;;
             macos) ditto -c -k --sequesterRsrc --keepParent "$bin/$APP_NAME.app" dist/$APP_NAME-macos.zip ;;
-            html5) (cd $bin && zip -qr ../../../../dist/$APP_NAME-html5.zip .) ;;
+            html5) (cd $bin && zip -qr ../../../dist/$APP_NAME-html5.zip .) ;;
           esac
 
       - uses: actions/upload-artifact@v7
