@@ -1,0 +1,107 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  APP_NAME: BoardCreator
+  HAXE_VERSION: 4.3.7
+  LIME_VERSION: 8.3.2
+  OPENFL_VERSION: 9.5.2
+  FLIXEL_VERSION: 6.2.0
+  FLIXEL_ADDONS_VERSION: 4.0.1
+  FLIXEL_UI_VERSION: 2.6.3
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: windows, os: windows-latest, target: windows, dir: windows }
+          - { name: linux, os: ubuntu-latest, target: linux, dir: linux }
+          - { name: macos, os: macos-latest, target: mac, dir: macos }
+          - { name: html5, os: ubuntu-latest, target: html5, dir: html5 }
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: ${{ env.HAXE_VERSION }}
+
+      - name: Dependencias de Linux
+        if: matrix.name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev \
+            libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev libxcursor-dev \
+            libdbus-1-dev libudev-dev
+
+      - name: Instalar librerías de Haxe
+        run: |
+          haxelib install lime $LIME_VERSION --quiet
+          haxelib install openfl $OPENFL_VERSION --quiet
+          haxelib install flixel $FLIXEL_VERSION --quiet
+          haxelib install flixel-addons $FLIXEL_ADDONS_VERSION --quiet
+          haxelib install flixel-ui $FLIXEL_UI_VERSION --quiet
+          haxelib list
+
+      - name: Instalar hxcpp
+        if: matrix.name != 'html5'
+        run: haxelib install hxcpp --quiet
+
+      - name: Compilar
+        run: haxelib run lime build ${{ matrix.target }} -release
+
+      - name: Empaquetar
+        run: |
+          mkdir -p dist
+          bin=export/release/${{ matrix.dir }}/bin
+          case "${{ matrix.name }}" in
+            windows) (cd $bin && 7z a -tzip ../../../../dist/$APP_NAME-windows.zip ./*) ;;
+            linux) tar -czf dist/$APP_NAME-linux.tar.gz -C $bin . ;;
+            macos) ditto -c -k --sequesterRsrc --keepParent "$bin/$APP_NAME.app" dist/$APP_NAME-macos.zip ;;
+            html5) (cd $bin && zip -qr ../../../../dist/$APP_NAME-html5.zip .) ;;
+          esac
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.APP_NAME }}-${{ matrix.name }}
+          path: dist/*
+          compression-level: 0
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*
+          generate_release_notes: true
