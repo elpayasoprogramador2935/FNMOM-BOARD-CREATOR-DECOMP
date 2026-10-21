@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<app title="FNMOM: BoardCreator" file="BoardCreator" main="Main" version="1.0.0" company="ME" packageName="com.fnmom.boardcreator" />
+
+	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" resizable="true" />
+
+	<set name="BUILD_DIR" value="export" />
+
+	<source path="source" />
+	<assets path="assets" exclude="*.ogg|*.mp3" />
+	<assets path="assets" include="*.mp3" if="html5" />
+	<assets path="assets" include="*.ogg" unless="html5" />
+
+	<icon path="art/icon16.png" size='16'/>
+	<icon path="art/icon32.png" size='32'/>
+	<icon path="art/icon64.png" size='64'/>
+	<icon path="art/iconOG.png" />
+
+	<haxelib name="flixel" />
+	<haxelib name="flixel-addons" />
+	<haxelib name="flixel-ui" />
+
+	<haxedef name="FLX_NO_DEBUG" unless="debug" />
+</project>

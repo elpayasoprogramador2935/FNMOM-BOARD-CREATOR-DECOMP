@@ -1,0 +1,310 @@
+{
+  "villains": {
+    "kingGhidorahUp": [
+      970,
+      -30,
+      true
+    ],
+    "destoroyah": [
+      992,
+      50,
+      true
+    ]
+  },
+  "tiles": [
+    [
+      12.2872674744576,
+      0,
+      "squareRed"
+    ],
+    [
+      93.2591890441254,
+      39,
+      "squareRed"
+    ],
+    [
+      173.781171778217,
+      -1,
+      "squareRed"
+    ],
+    [
+      172.996106416918,
+      79,
+      "squareRed"
+    ],
+    [
+      253.211663610302,
+      39,
+      "squareRedQuestion"
+    ],
+    [
+      335.653341207653,
+      78,
+      "squareRedTemple"
+    ],
+    [
+      416.472952288575,
+      38,
+      "squareRedTemple"
+    ],
+    [
+      335.540985746309,
+      -1,
+      "squareRedTV"
+    ],
+    [
+      -45.942435297184,
+      155,
+      "squareRed"
+    ],
+    [
+      497.724350173026,
+      -2,
+      "squareRedKill"
+    ],
+    [
+      498.386782272719,
+      78,
+      "squareRedKill"
+    ],
+    [
+      579.381047681905,
+      38,
+      "squareRedBlood"
+    ],
+    [
+      659.702009397559,
+      -1,
+      "squareRedBlood"
+    ],
+    [
+      660.851101176813,
+      79,
+      "squareRedMeat"
+    ],
+    [
+      742.591152920388,
+      39,
+      "squareRedMeat"
+    ],
+    [
+      824.285681012087,
+      77,
+      "squareRedRock"
+    ],
+    [
+      822.384919688106,
+      -2,
+      "squareRedRock"
+    ],
+    [
+      904.512239927426,
+      37,
+      "squareRedRock"
+    ],
+    [
+      985.507253934629,
+      -1,
+      "squareRed"
+    ],
+    [
+      985.253690423444,
+      78,
+      "squareRed"
+    ],
+    [
+      1065.79820128437,
+      38,
+      "squareRedSatelite"
+    ]
+  ],
+  "movemap": {
+    "0": [
+      null,
+      null,
+      null,
+      1,
+      null,
+      null
+    ],
+    "1": [
+      null,
+      null,
+      2,
+      3,
+      0,
+      null
+    ],
+    "2": [
+      null,
+      3,
+      null,
+      4,
+      null,
+      1
+    ],
+    "3": [
+      2,
+      null,
+      4,
+      null,
+      1,
+      null
+    ],
+    "4": [
+      null,
+      null,
+      7,
+      5,
+      2,
+      3
+    ],
+    "5": [
+      7,
+      null,
+      6,
+      null,
+      4,
+      null
+    ],
+    "6": [
+      null,
+      null,
+      9,
+      10,
+      7,
+      5
+    ],
+    "7": [
+      null,
+      5,
+      null,
+      6,
+      null,
+      4
+    ],
+    "9": [
+      null,
+      10,
+      null,
+      11,
+      null,
+      6
+    ],
+    "10": [
+      9,
+      null,
+      11,
+      null,
+      6,
+      null
+    ],
+    "11": [
+      null,
+      null,
+      12,
+      13,
+      9,
+      10
+    ],
+    "12": [
+      null,
+      13,
+      null,
+      14,
+      null,
+      11
+    ],
+    "13": [
+      12,
+      null,
+      14,
+      null,
+      11,
+      null
+    ],
+    "14": [
+      null,
+      null,
+      16,
+      15,
+      12,
+      13
+    ],
+    "15": [
+      16,
+      null,
+      17,
+      null,
+      14,
+      null
+    ],
+    "16": [
+      null,
+      15,
+      null,
+      17,
+      null,
+      14
+    ],
+    "17": [
+      null,
+      null,
+      18,
+      19,
+      16,
+      15
+    ],
+    "18": [
+      null,
+      19,
+      null,
+      20,
+      null,
+      17
+    ],
+    "19": [
+      18,
+      null,
+      20,
+      null,
+      17,
+      null
+    ],
+    "20": [
+      null,
+      null,
+      null,
+      null,
+      18,
+      19
+    ]
+  },
+  "actorsPosition": {
+    "solomon": [
+      30,
+      -5,
+      true
+    ],
+    "mothra": [
+      187,
+      66,
+      true
+    ],
+    "anguirus": [
+      78,
+      57,
+      true
+    ],
+    "godzilla": [
+      176,
+      -16,
+      true
+    ],
+    "acacius": [
+      -33,
+      136,
+      true
+    ]
+  }
+}
