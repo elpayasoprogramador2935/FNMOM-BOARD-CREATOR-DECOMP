@@ -1,0 +1,88 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HAXE_VERSION: 4.3.7
+  LIME_VERSION: 8.3.2
+  OPENFL_VERSION: 9.5.2
+  FLIXEL_VERSION: 6.2.0
+  FLIXEL_ADDONS_VERSION: 4.0.2
+  FLIXEL_UI_VERSION: 2.6.5
+
+jobs:
+  build:
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: html5
+            os: ubuntu-latest
+          - target: linux
+            os: ubuntu-latest
+          - target: windows
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: krdlab/setup-haxe@18e4b483cfffca2fb8881530bf8a6cec39dac8fb # v2.1.1
+        with:
+          haxe-version: ${{ env.HAXE_VERSION }}
+
+      - name: Dependencias del sistema (linux)
+        if: matrix.target == 'linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev \
+            libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/haxelib
+          key: haxelib-${{ matrix.target }}-${{ runner.os }}-${{ hashFiles('.github/workflows/build.yml') }}
+
+      - name: Instalar librerías de Haxe
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/haxelib"
+          haxelib setup "$RUNNER_TEMP/haxelib"
+          haxelib --always install lime "$LIME_VERSION"
+          haxelib --always install openfl "$OPENFL_VERSION"
+          haxelib --always install flixel "$FLIXEL_VERSION"
+          haxelib --always install flixel-addons "$FLIXEL_ADDONS_VERSION"
+          haxelib --always install flixel-ui "$FLIXEL_UI_VERSION"
+          if [ "${{ matrix.target }}" != "html5" ]; then
+            haxelib --always install hxcpp
+          fi
+          haxelib list
+
+      - name: Compilar
+        run: haxelib run lime build ${{ matrix.target }} -release
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: BoardCreator-${{ matrix.target }}
+          path: export/${{ matrix.target }}/bin
+          if-no-files-found: error
+          retention-days: 7
