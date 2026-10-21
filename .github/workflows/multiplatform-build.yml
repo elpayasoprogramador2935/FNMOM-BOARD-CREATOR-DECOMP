@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 env:
-  APP_NAME: BoardCreator
+  APP_NAME: FNMOM Board Creator
   HAXE_VERSION: 4.3.7
   LIME_VERSION: 8.3.2
   OPENFL_VERSION: 9.5.2
@@ -87,17 +87,19 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.APP_NAME }}-${{ matrix.name }}
           path: dist/*
-          compression-level: 0
+          archive: false
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref_name == github.event.repository.default_branch)
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
 
     steps:
       - uses: actions/download-artifact@v8
@@ -105,7 +107,11 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - uses: softprops/action-gh-release@v3
-        with:
-          files: dist/*
-          generate_release_notes: true
+      - name: Publicar release
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
+          else
+            gh release delete latest --cleanup-tag --yes || true
+            gh release create latest dist/* --prerelease --target "$GITHUB_SHA" --title "Build más reciente" --notes "Compilación automática del commit $GITHUB_SHA"
+          fi
