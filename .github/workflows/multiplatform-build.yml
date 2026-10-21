@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 env:
-  APP_NAME: FNMOM Board Creator
+  APP_NAME: BoardCreator
   HAXE_VERSION: 4.3.7
   LIME_VERSION: 8.3.2
   OPENFL_VERSION: 9.5.2
@@ -76,13 +76,14 @@ jobs:
       - name: Empaquetar
         run: |
           mkdir -p dist
-          bin=export/${{ matrix.dir }}/bin
-          test -d $bin || { find export -maxdepth 3 -type d; exit 1; }
+          bin="export/${{ matrix.dir }}/bin"
+          test -d "$bin" || { find export -maxdepth 3 -type d; exit 1; }
+          app_file=$(sed -n 's/.*<app [^>]*file="\([^"]*\)".*/\1/p' Project.xml | head -1)
           case "${{ matrix.name }}" in
-            windows) (cd $bin && 7z a -tzip ../../../dist/$APP_NAME-windows.zip ./*) ;;
-            linux) tar -czf dist/$APP_NAME-linux.tar.gz -C $bin . ;;
-            macos) ditto -c -k --sequesterRsrc --keepParent "$bin/$APP_NAME.app" dist/$APP_NAME-macos.zip ;;
-            html5) (cd $bin && zip -qr ../../../dist/$APP_NAME-html5.zip .) ;;
+            windows) (cd "$bin" && 7z a -tzip "../../../dist/$APP_NAME-windows.zip" ./*) ;;
+            linux) tar -czf "dist/$APP_NAME-linux.tar.gz" -C "$bin" . ;;
+            macos) ditto -c -k --sequesterRsrc --keepParent "$bin/$app_file.app" "dist/$APP_NAME-macos.zip" ;;
+            html5) (cd "$bin" && zip -qr "../../../dist/$APP_NAME-html5.zip" .) ;;
           esac
 
       - uses: actions/upload-artifact@v7
@@ -114,4 +115,3 @@ jobs:
           else
             gh release delete latest --cleanup-tag --yes || true
             gh release create latest dist/* --prerelease --target "$GITHUB_SHA" --title "Build más reciente" --notes "Compilación automática del commit $GITHUB_SHA"
-          fi
