@@ -1,4 +1,4 @@
-name: Build
+name: multiplatform-build
 
 on:
   push:
@@ -21,7 +21,7 @@ env:
   OPENFL_VERSION: 9.5.2
   FLIXEL_VERSION: 6.2.0
   FLIXEL_ADDONS_VERSION: 4.0.1
-  FLIXEL_UI_VERSION: 2.6.3
+  FLIXEL_UI_REF: ff2f301
 
 jobs:
   build:
@@ -60,7 +60,7 @@ jobs:
           haxelib install openfl $OPENFL_VERSION --quiet
           haxelib install flixel $FLIXEL_VERSION --quiet
           haxelib install flixel-addons $FLIXEL_ADDONS_VERSION --quiet
-          haxelib install flixel-ui $FLIXEL_UI_VERSION --quiet
+          haxelib git flixel-ui https://github.com/HaxeFlixel/flixel-ui $FLIXEL_UI_REF
           haxelib list
 
       - name: Instalar hxcpp
