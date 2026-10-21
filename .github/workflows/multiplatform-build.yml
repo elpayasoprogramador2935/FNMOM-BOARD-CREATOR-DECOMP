@@ -108,10 +108,12 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Publicar release
+      - name: Publicar release versionado
+        if: startsWith(github.ref, 'refs/tags/')
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
+
+      - name: Publicar release latest
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
-          else
-            gh release delete latest --cleanup-tag --yes || true
-            gh release create latest dist/* --prerelease --target "$GITHUB_SHA" --title "Build más reciente" --notes "Compilación automática del commit $GITHUB_SHA"
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest dist/* --prerelease --target "$GITHUB_SHA" --title "Build más reciente" --notes "Compilación automática del commit $GITHUB_SHA"
