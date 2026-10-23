@@ -1,5 +1,6 @@
 package;
 
+import haxe.io.Bytes;
 import haxe.io.Path;
 #if sys
 import sys.FileSystem;
@@ -36,6 +37,14 @@ class BoardStore
 			FileSystem.createDirectory(FOLDER);
 
 		File.saveContent(FOLDER + "/" + file, content);
+	}
+
+	public static function writeImage(file:String, content:Bytes)
+	{
+		if (!FileSystem.exists(FOLDER))
+			FileSystem.createDirectory(FOLDER);
+
+		File.saveBytes(FOLDER + "/" + file, content);
 	}
 
 	public static function delete(file:String)

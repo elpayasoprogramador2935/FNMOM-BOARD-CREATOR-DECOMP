@@ -34,32 +34,70 @@ class BoardPreview
 		if (pieces.length == 0)
 			return canvas;
 
-		var left = Math.POSITIVE_INFINITY;
-		var top = Math.POSITIVE_INFINITY;
-		var right = Math.NEGATIVE_INFINITY;
-		var bottom = Math.NEGATIVE_INFINITY;
-
-		for (item in pieces)
-		{
-			left = Math.min(left, item.x);
-			top = Math.min(top, item.y);
-			right = Math.max(right, item.x + item.image.width * SCALE);
-			bottom = Math.max(bottom, item.y + item.image.height * SCALE);
-		}
-
-		var zoom = Math.min((width - MARGIN * 2) / (right - left), (height - MARGIN * 2) / (bottom - top));
-		var offsetX = (width - (right - left) * zoom) / 2;
-		var offsetY = (height - (bottom - top) * zoom) / 2;
+		var area = bounds(pieces);
+		var zoom = Math.min((width - MARGIN * 2) / (area.right - area.left), (height - MARGIN * 2) / (area.bottom - area.top));
+		var offsetX = (width - (area.right - area.left) * zoom) / 2;
+		var offsetY = (height - (area.bottom - area.top) * zoom) / 2;
 
 		for (item in pieces)
 		{
 			var matrix = new Matrix();
 			matrix.scale(SCALE * zoom, SCALE * zoom);
-			matrix.translate(offsetX + (item.x - left) * zoom, offsetY + (item.y - top) * zoom);
+			matrix.translate(offsetX + (item.x - area.left) * zoom, offsetY + (item.y - area.top) * zoom);
 			canvas.draw(item.image, matrix, null, null, null, true);
 		}
 
 		return canvas;
+	}
+
+	public static function capture(tiles:Array<BoardTile>, chars:Array<GodziChar>):BitmapData
+	{
+		var pieces:Array<Piece> = [];
+
+		for (tile in tiles)
+			pieces.push(piece(tileImage(tile.material), tile.x, tile.y));
+
+		for (char in chars)
+		{
+			pieces.push({
+				image: charImage(char.curChar),
+				x: char.x - char.offset.x + char.origin.x * (1 - SCALE),
+				y: char.y - char.offset.y + char.origin.y * (1 - SCALE)
+			});
+		}
+
+		var area = bounds(pieces);
+		var canvas = new BitmapData(Math.ceil(area.right - area.left), Math.ceil(area.bottom - area.top), true, 0);
+
+		for (item in pieces)
+		{
+			var matrix = new Matrix();
+			matrix.scale(SCALE, SCALE);
+			matrix.translate(Math.round(item.x - area.left), Math.round(item.y - area.top));
+			canvas.draw(item.image, matrix);
+		}
+
+		return canvas;
+	}
+
+	static function bounds(pieces:Array<Piece>)
+	{
+		var area = {
+			left: Math.POSITIVE_INFINITY,
+			top: Math.POSITIVE_INFINITY,
+			right: Math.NEGATIVE_INFINITY,
+			bottom: Math.NEGATIVE_INFINITY
+		};
+
+		for (item in pieces)
+		{
+			area.left = Math.min(area.left, item.x);
+			area.top = Math.min(area.top, item.y);
+			area.right = Math.max(area.right, item.x + item.image.width * SCALE);
+			area.bottom = Math.max(area.bottom, item.y + item.image.height * SCALE);
+		}
+
+		return area;
 	}
 
 	static function piece(image:BitmapData, x:Float, y:Float):Piece

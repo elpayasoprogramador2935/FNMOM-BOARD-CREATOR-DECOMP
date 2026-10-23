@@ -17,6 +17,7 @@ import flixel.util.FlxColor;
 import haxe.Json;
 import haxe.Timer;
 import haxe.io.Path;
+import openfl.display.PNGEncoderOptions;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
 #if sys
@@ -976,13 +977,17 @@ class PlayState extends FlxUIState
 				var boardsButton = new FlxUIButton(10, 110, "Boards", function() boards.open());
 				boardsButton.resize(120, 24);
 
-				var shortcut = new FlxText(10, 145, 280, "Ctrl+S saves the current board.");
+				var exportButton = new FlxUIButton(10, 145, "Export PNG", exportPng);
+				exportButton.resize(120, 24);
+
+				var shortcut = new FlxText(10, 180, 280, "Ctrl+S saves the current board.");
 
 				var group = new FlxUI(null, UI_box);
 				group.name = "Data";
 				group.add(clearButton);
 				group.add(idsButton);
 				group.add(boardsButton);
+				group.add(exportButton);
 				group.add(shortcut);
 				tabMenu.addGroup(group);
 
@@ -1038,7 +1043,7 @@ class PlayState extends FlxUIState
 
 	function saveInFolder()
 	{
-		var name = ~/[\\\/:*?"<>|]/g.replace(boardName.text, "_") + DATA_SUFFIX + ".json";
+		var name = safeName() + DATA_SUFFIX + ".json";
 
 		var data = serialize();
 
@@ -1048,6 +1053,29 @@ class PlayState extends FlxUIState
 		#if html5
 		new FileReference().save(data, name);
 		#end
+	}
+
+	function exportPng()
+	{
+		if (leTiles.length == 0 && globalChars.length == 0)
+			return;
+
+		var image = BoardPreview.capture(leTiles, globalChars);
+		var png = image.encode(image.rect, new PNGEncoderOptions());
+		image.dispose();
+
+		var name = safeName() + ".png";
+
+		#if html5
+		new FileReference().save(png, name);
+		#elseif sys
+		BoardStore.writeImage(name, png);
+		#end
+	}
+
+	function safeName():String
+	{
+		return ~/[\\\/:*?"<>|]/g.replace(boardName.text, "_");
 	}
 
 	function serialize():String
